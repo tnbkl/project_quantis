@@ -8,12 +8,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logging.info("Starting Binance Futures Client...")
 
 class BinanceFuturesClient:
-    def __init__(self, symbol, timeframe='1m', take_profit=0.02, stop_loss=0.01, balance_allocation=0.1, candlestick_limit=10):
+    def __init__(self, symbol, timeframe='1m', take_profit=0.02, stop_loss=0.01, balance_allocation=0.1, candlestick_limit=500):
         self.symbol = symbol
         self.timeframe = timeframe
-        self.take_profit = take_profit
-        self.stop_loss = stop_loss
-        self.balance_allocation = balance_allocation
         self.candlestick_limit = candlestick_limit
 
         self.exchange = ccxt.binance({
@@ -82,9 +79,11 @@ class BinanceFuturesClient:
         """Fetch open positions on Binance Futures"""
         return self.safe_api_call(self.exchange.fetch_positions)
 
-    def fetch_latest_candles(self):
+    def fetch_latest_candles(self, limit = None):
         """Fetch latest candlestick data for the given symbol"""
-        return self.safe_api_call(self.exchange.fetch_ohlcv, self.symbol, self.timeframe, limit=self.candlestick_limit)
+        if limit is None:
+            limit = self.candlestick_limit
+        return self.safe_api_call(self.exchange.fetch_ohlcv, self.symbol, self.timeframe, limit=limit)
 
     def place_order(self, order_type, side, amount, price=None):
         """Place an order on Binance Futures"""

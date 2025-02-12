@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3dca274a-10e4-457d-bda9-f2cadbbe8216" name="Changes" comment="mac" />
+    <list default="true" id="3dca274a-10e4-457d-bda9-f2cadbbe8216" name="Changes" comment="mac">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project_quantis/binance_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/project_quantis/binance_client.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project_quantis/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/project_quantis/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project_quantis/strategy.py" beforeDir="false" afterPath="$PROJECT_DIR$/project_quantis/strategy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project_quantis/trade_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/project_quantis/trade_manager.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -18,18 +24,31 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "tnbkl"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;history&quot;: [
+    {
+      &quot;assignee&quot;: &quot;tnbkl&quot;
+    }
+  ],
+  &quot;lastFilter&quot;: {}
+}</component>
+  <component name="GitHubPullRequestState">{
+  &quot;prStates&quot;: [
+    {
+      &quot;id&quot;: {
+        &quot;id&quot;: &quot;PR_kwDON4c8586LAmnB&quot;,
+        &quot;number&quot;: 1
+      },
+      &quot;lastSeen&quot;: 1739390308967
+    }
+  ]
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/tnbkl/project_quantis.git&quot;,
+    &quot;accountId&quot;: &quot;0cfbdef2-ab21-4fb9-8eec-15e3d6872be4&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/tnbkl/project_quantis.git",
-    "accountId": "0cfbdef2-ab21-4fb9-8eec-15e3d6872be4"
-  }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 6
@@ -39,21 +58,23 @@
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
+    <option name="sortByType" value="true" />
+    <option name="sortKey" value="BY_TYPE" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Notification.DisplayName-DoNotAsk-CythonWarning": "Python debugger native extension available",
-    "Notification.DoNotAsk-CythonWarning": "true",
-    "Python.config.executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.strategy.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "macbranch",
-    "ignore.virus.scanning.warn.message": "true",
-    "settings.editor.selected.configurable": "configurable.group.tools"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Notification.DisplayName-DoNotAsk-CythonWarning&quot;: &quot;Python debugger native extension available&quot;,
+    &quot;Notification.DoNotAsk-CythonWarning&quot;: &quot;true&quot;,
+    &quot;Python.config.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.strategy.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;macbranch&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.tools&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\tbuyu\PycharmProjects\_Project_Quantis\" />
@@ -120,7 +141,15 @@
       <option name="project" value="LOCAL" />
       <updated>1739389727026</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="mac">
+      <option name="closed" value="true" />
+      <created>1739390131148</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1739390131148</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">

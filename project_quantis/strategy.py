@@ -3,9 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import mplfinance as mpf
 
-
 class SignalGenerator:
-    def __init__(self, client, ema_weight=1, rsi_weight=1, macd_weight=1, atr_weight=1, bb_weight=1,
+    def __init__(self, client, ema_weight=0.2, rsi_weight=0.2, macd_weight=0.2, atr_weight=0.2, bb_weight=0.2,
                  signal_threshold=0.5):
         self.client = client
         self.ema_weight = ema_weight
@@ -18,7 +17,7 @@ class SignalGenerator:
     def fetch_candles(self, historical=False):
         if historical:
             # Fetching larger historical data for backtesting
-            candles = self.client.exchange.fetch_ohlcv(self.client.symbol, self.client.timeframe, limit=1000)
+            candles = self.client.fetch_latest_candles(limit=1000)
         else:
             candles = self.client.fetch_latest_candles()
 
@@ -229,8 +228,11 @@ class SignalGenerator:
         df['true_range'] = df[['high_low', 'high_close', 'low_close']].max(axis=1)
         df['atr'] = df['true_range'].rolling(window=period).mean()
 
-        # Use ATR for dynamic stop loss logic or volatility-based filters (signal placeholder)
-        df['atr_signal'] = 0  # Neutral by default; customize if needed
+        # Generate ATR-based signals (example: volatility filter)
+        df['atr_signal'] = 0
+        df.loc[df['atr'] > df['atr'].rolling(50).mean(), 'atr_signal'] = 1  # High volatility: valid signals
+        df.loc[df['atr'] < df['atr'].rolling(50).mean(), 'atr_signal'] = -1  # Low volatility: ignore signals
+
         return df
 
     def generate_signal(self, historical=False):
@@ -259,52 +261,10 @@ class SignalGenerator:
 
         return df
 
-
-'''
-def macd_strategy(self, df, short_window=12, long_window=26, signal_window=9):
-    df['macd_ema_short'] = df['close'].ewm(span=short_window, adjust=False).mean()
-    df['macd_ema_long'] = df['close'].ewm(span=long_window, adjust=False).mean()
-    df['macd'] = df['macd_ema_short'] - df['macd_ema_long']
-    df['macd_sgn_line'] = df['macd'].ewm(span=signal_window, adjust=False).mean()
-
-    # Vectorized crossover detection
-    df['prev_macd'] = df['macd'].shift(1)
-    df['prev_signal'] = df['macd_sgn_line'].shift(1)
-
-    # Crossover conditions
-    golden_cross = (df['macd'] > df['macd_sgn_line']) & (df['prev_macd'] <= df['prev_signal'])
-    death_cross = (df['macd'] < df['macd_sgn_line']) & (df['prev_macd'] >= df['prev_signal'])
-
-    df['macd_signal'] = 0
-    df.loc[golden_cross, 'macd_signal'] = 1
-    df.loc[death_cross, 'macd_signal'] = -1
-
-    return df.drop(columns=['prev_macd', 'prev_signal'])
-
-
-
-def bollinger_bands_strategy(self, df, window=20, num_std=2):
-    df['middle_band'] = df['close'].rolling(window=window).mean()
-    df['upper_band'] = df['middle_band'] + (df['close'].rolling(window=window).std() * num_std)
-    df['lower_band'] = df['middle_band'] - (df['close'].rolling(window=window).std() * num_std)
-
-    conditions = []
-    for i in range(1, len(df)):
-        if df['close'].iloc[i] < df['lower_band'].iloc[i]:
-            conditions.append(1)  # BUY (Oversold)
-        elif df['close'].iloc[i] > df['upper_band'].iloc[i]:
-            conditions.append(-1)  # SELL (Overbought)
-        else:
-            conditions.append(0)  # HOLD
-
-    df['bb_signal'] = [0] + conditions
-    return df
-'''
-
-
 class Backtester:
-    def __init__(self, signal_generator, initial_balance=1000, stop_loss=0.01, take_profit=0.02,
-                 fee_rate=0.0005, mode=1):
+    def __init__(self, signal_generator, initial_balance=1000, fee_rate=0.0005,
+                 mode=1, take_profit=0.02, stop_loss=0.01,
+                 dynamic_levels=False, atr_sl_mult=1.5, atr_tp_mult=3):
         """
         Initialize the Backtester class.
 
@@ -314,6 +274,7 @@ class Backtester:
         :param take_profit: Take profit level as a percentage.
         :param fee_rate: Trading fee rate (e.g., 0.0005 for Binance).
         :param mode: Trading mode (1: Close on TP/SL, 2: Close on opposite signal).
+        :param dynamic_levels: Use ATR-based TP/SL for mode=1
         """
         self.signal_generator = signal_generator
         self.initial_balance = initial_balance
@@ -326,6 +287,10 @@ class Backtester:
         self.position_size = 0
         self.position_type = None
         self.trades = []
+        self.mode = mode
+        self.dynamic_levels = dynamic_levels
+        self.atr_sl_mult = atr_sl_mult
+        self.atr_tp_mult = atr_tp_mult
 
     def execute_trade(self, action, price, timestamp):
         """
@@ -381,7 +346,7 @@ class Backtester:
         """
         df = self.signal_generator.generate_signal(historical=True)
 
-        # Log the initial balance
+        # Initial balance log
         self.trades.append({
             'timestamp': df['timestamp'].iloc[0],
             'type': 'INITIAL_BALANCE',
@@ -404,15 +369,33 @@ class Backtester:
                 elif signal == -1:
                     self.execute_trade('SELL', price, timestamp)
             else:
-                if self.mode == 1:  # Close on TP/SL
+                if self.mode == 1:  # TP/SL exit mode
+                    # Calculate SL/TP levels
+                    if self.dynamic_levels:
+                        current_atr = row['atr']
+                        sl = current_atr * self.atr_sl_mult
+                        tp = current_atr * self.atr_tp_mult
+                    else:
+                        sl = self.entry_price * self.stop_loss
+                        tp = self.entry_price * self.take_profit
+
+                    # Determine exit prices
                     if self.position_type == 'LONG':
-                        if price >= self.entry_price * (1 + self.take_profit) or price <= self.entry_price * (
-                                1 - self.stop_loss):
-                            self.execute_trade('CLOSE', price, timestamp)
-                    elif self.position_type == 'SHORT':
-                        if price <= self.entry_price * (1 - self.take_profit) or price >= self.entry_price * (
-                                1 + self.stop_loss):
-                            self.execute_trade('CLOSE', price, timestamp)
+                        sl_price = self.entry_price - sl if self.dynamic_levels else self.entry_price * (
+                                    1 - self.stop_loss)
+                        tp_price = self.entry_price + tp if self.dynamic_levels else self.entry_price * (
+                                    1 + self.take_profit)
+                        exit_cond = price <= sl_price or price >= tp_price
+                    else:  # SHORT
+                        sl_price = self.entry_price + sl if self.dynamic_levels else self.entry_price * (
+                                    1 + self.stop_loss)
+                        tp_price = self.entry_price - tp if self.dynamic_levels else self.entry_price * (
+                                    1 - self.take_profit)
+                        exit_cond = price >= sl_price or price <= tp_price
+
+                    if exit_cond:
+                        self.execute_trade('CLOSE', price, timestamp)
+
 
                 elif self.mode == 2:  # Close on opposite signal
                     if (signal == -1 and self.position_type == 'LONG') or (
