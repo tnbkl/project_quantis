@@ -12,7 +12,7 @@ DYNAMIC_LEVELS = False
 TAKE_PROFIT = 0.02
 STOP_LOSS = 0.01
 BALANCE_ALLOCATION = 0.5
-SIGNAL_THRESHOLD = 0.2
+SIGNAL_THRESHOLD = 0.5
 
 def main():
     client = binance_client.BinanceFuturesClient(symbol = SYMBOL, timeframe = TIMEFRAME,
