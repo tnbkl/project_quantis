@@ -3,4 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="Python 3.13 (_Project_Quantis)" />
   </component>
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.13 (_Project_Quantis)" project-jdk-type="Python SDK" />
 </project>
