@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import mplfinance as mpf
 
 class SignalGenerator:
-    def __init__(self, client, ema_weight=0.2, rsi_weight=0.2, macd_weight=0.2, atr_weight=0.2, bb_weight=0.2,
+    def __init__(self, client, ema_weight=0.4, rsi_weight=0.4, macd_weight=0.4, bb_weight=0.8, atr_weight=0.2,
                  signal_threshold=0.5):
         self.client = client
         self.ema_weight = ema_weight
@@ -29,7 +29,7 @@ class SignalGenerator:
         df['close'] = df['close'].astype(float)
         return df
 
-    def ema_strategy(self, df, short=7, medium=25, long=99, atr_period=14):
+    def ema_strategy(self, df, short=7, medium=25, long=99):
         # Calculate EMAs
         df['ema_short'] = df['close'].ewm(span=short, adjust=False).mean()
         df['ema_medium'] = df['close'].ewm(span=medium, adjust=False).mean()
@@ -56,14 +56,10 @@ class SignalGenerator:
 
         # Generate signals
         df['ema_signal'] = 0
-        df.loc[curr_buy_cond & prev_buy_cond, 'ema_signal'] = 1
-        df.loc[curr_sell_cond & prev_sell_cond, 'ema_signal'] = -1
-
-        # # Add risk levels
-        # df = self.add_risk_levels(df, atr_period)
-
-        # Smooth signals
-        # df['ema_signal'] = df['ema_signal'].rolling(3, min_periods=1).mean().round()
+        df.loc[curr_buy_cond, 'ema_signal'] = 1
+        df.loc[curr_sell_cond, 'ema_signal'] = -1
+        # df.loc[curr_buy_cond & prev_buy_cond, 'ema_signal'] = 1
+        # df.loc[curr_sell_cond & prev_sell_cond, 'ema_signal'] = -1
 
         return df
 
@@ -133,7 +129,7 @@ class SignalGenerator:
 
         return df
 
-    def macd_strategy(self, df, short_window=12, long_window=26, signal_window=9):
+    def macd_strategy(self, df, short_window=12, long_window=26, signal_window=9, cw=0.3, hw=0.7, threshold=0.5):
         # Calculate core MACD components
         df['macd_ema_short'] = df['close'].ewm(span=short_window, adjust=False).mean()
         df['macd_ema_long'] = df['close'].ewm(span=long_window, adjust=False).mean()
@@ -141,83 +137,54 @@ class SignalGenerator:
         df['macd_sgn_line'] = df['macd'].ewm(span=signal_window, adjust=False).mean()
         df['macd_hist'] = df['macd'] - df['macd_sgn_line']
 
-        # Vectorized crossover detection
-        df['prev_macd'] = df['macd'].shift(1)
-        df['prev_signal'] = df['macd_sgn_line'].shift(1)
+        # Generate crossover signal
+        df['crossover_signal'] = 0
+        crossover_buy = (df['macd'] > df['macd_sgn_line']) & (df['macd'].shift(1) <= df['macd_sgn_line'].shift(1))
+        crossover_sell = (df['macd'] < df['macd_sgn_line']) & (df['macd'].shift(1) >= df['macd_sgn_line'].shift(1))
+        df.loc[crossover_buy, 'crossover_signal'] = 1
+        df.loc[crossover_sell, 'crossover_signal'] = -1
 
-        # Bullish/Bearish cross conditions
-        golden_cross = (df['macd'] > df['macd_sgn_line']) & (df['prev_macd'] <= df['prev_signal'])
-        death_cross = (df['macd'] < df['macd_sgn_line']) & (df['prev_macd'] >= df['prev_signal'])
+        # Calculate histogram components
+        df['hist_diff'] = df['macd_hist'] - df['macd_hist'].shift(1)
+        df['hist_slope'] = df['macd_hist'].diff().rolling(3).mean()
+        hist_buy = (df['hist_diff'] > 0) & (df['macd_hist'] > 0)
+        hist_sell = (df['hist_diff'] < 0) & (df['macd_hist'] < 0)
 
-        # Divergence detection (price vs MACD) with relaxed conditions
-        price_peaks = df['close'].rolling(5, center=True).max()
-        macd_peaks = df['macd'].rolling(5, center=True).max()
-        bear_divergence = np.isclose(price_peaks, price_peaks.shift(-2), atol=0.7) & (macd_peaks < macd_peaks.shift(-2))
+        # Strengthen signals with steeper slopes
+        hist_buy = hist_buy & (df['hist_slope'] > df['hist_slope'].rolling(5).mean())
+        hist_sell = hist_sell & (df['hist_slope'] < df['hist_slope'].rolling(5).mean())
 
-        price_troughs = df['close'].rolling(5, center=True).min()
-        macd_troughs = df['macd'].rolling(5, center=True).min()
-        bull_divergence = np.isclose(price_troughs, price_troughs.shift(-2), atol=0.7) & (
-                macd_troughs > macd_troughs.shift(-2))
+        # Generate histogram reversal signal
+        df['hist_signal'] = 0
+        df.loc[hist_buy, 'hist_signal'] = 1
+        df.loc[hist_sell, 'hist_signal'] = -1
 
-        # Relaxed Signal generation (no zero-line requirement)
-        df['macd_signal'] = 0
-        df.loc[golden_cross & bull_divergence, 'macd_signal'] = 1
-        df.loc[death_cross & bear_divergence, 'macd_signal'] = -1
-
-        # Signal smoothing filter
-        df['macd_signal'] = df['macd_signal'].rolling(
-            window=3, min_periods=1, center=True
-        ).mean().apply(lambda x: 1 if x > 0.3 else -1 if x < -0.3 else 0)
-
-        # Cleanup temporary columns
-        df.drop(columns=['prev_macd', 'prev_signal'], inplace=True, errors='ignore')
+        # Combine signals with weights
+        df['combined_macd'] = (df['crossover_signal'] * cw) + (df['hist_signal'] * hw)
+        df['macd_signal'] = df['combined_macd'].apply(lambda x: 1 if x >= threshold else -1 if x <= -threshold else 0)
 
         return df
 
-    def bollinger_bands_strategy(self, df, window=20, num_std=2, confirmation_period=1, squeeze_lookback=10):
-        # Core BB calculation
+    def bollinger_bands_strategy(self, df, window=20, num_std=2):
+        # Calculate Bollinger Bands
         df['middle_band'] = df['close'].rolling(window=window).mean()
         rolling_std = df['close'].rolling(window=window).std()
         df['upper_band'] = df['middle_band'] + (rolling_std * num_std)
         df['lower_band'] = df['middle_band'] - (rolling_std * num_std)
 
-        # Additional metrics
-        df['percent_b'] = (df['close'] - df['lower_band']) / (df['upper_band'] - df['lower_band'])  # %b indicator
-        df['band_width'] = (df['upper_band'] - df['lower_band']) / df['middle_band']  # Normalized bandwidth
+        # Calculate Bollinger Band Width (BBW)
+        df['band_width'] = (df['upper_band'] - df['lower_band']) / df['middle_band']
 
-        # Squeeze detection
-        df['squeeze'] = df['band_width'].rolling(squeeze_lookback).mean() < df['band_width'].mean() * 0.75
-
-        # Vectorized signal conditions
-        close_below_lower = df['close'] < df['lower_band']
-        close_above_upper = df['close'] > df['upper_band']
-
-        # Confirmation conditions (ensure boolean)
-        confirmed_buy = close_below_lower.rolling(confirmation_period).apply(lambda x: x.all()).astype(bool)
-        confirmed_sell = close_above_upper.rolling(confirmation_period).apply(lambda x: x.all()).astype(bool)
-
-        # Band crossover momentum
-        df['middle_band_slope'] = df['middle_band'].diff(3).apply(lambda x: 1 if x > 0 else -1 if x < 0 else 0)
-
-        # Volume confirmation (optional)
-        df['volume_ma'] = df['volume'].rolling(5).mean()
-        volume_spike = df['volume'] > df['volume_ma'] * 1.5
-
-        # Generate signals with multiple confirmations
+        # Generate mean reversion signals
         df['bb_signal'] = 0
-        df.loc[confirmed_buy & (df['percent_b'] < 0.2) & (df['middle_band_slope'] >= 0) & volume_spike, 'bb_signal'] = 1
-        df.loc[
-            confirmed_sell & (df['percent_b'] > 0.8) & (df['middle_band_slope'] <= 0) & volume_spike, 'bb_signal'] = -1
 
-        # Squeeze breakout signals
-        df['squeeze_break'] = (df['band_width'].diff() > df['band_width'].std()) & df['squeeze'].shift(1)
-        df.loc[df['squeeze_break'] & (df['close'] > df['upper_band']), 'bb_signal'] = -1
-        df.loc[df['squeeze_break'] & (df['close'] < df['lower_band']), 'bb_signal'] = 1
+        # Buy when price touches or breaks the lower band
+        buy_condition = (df['close'] < df['lower_band']) & (df['close'].shift(1) >= df['lower_band'])
+        df.loc[buy_condition, 'bb_signal'] = 1
 
-        # Smooth signals
-        df['bb_signal'] = df['bb_signal'].rolling(
-            window=3, min_periods=1, center=True
-        ).mean().apply(lambda x: 1 if x > 0.5 else -1 if x < -0.5 else 0)
+        # Sell when price touches or breaks the upper band
+        sell_condition = (df['close'] > df['upper_band']) & (df['close'].shift(1) <= df['upper_band'])
+        df.loc[sell_condition, 'bb_signal'] = -1
 
         return df
 
@@ -240,19 +207,30 @@ class SignalGenerator:
         df = self.ema_strategy(df)
         df = self.rsi_strategy(df)
         df = self.macd_strategy(df)
-        df = self.atr_strategy(df)
         df = self.bollinger_bands_strategy(df)
+        df = self.atr_strategy(df)
+
+        def print_signal_counts(df, signal_column='final_signal'):
+            buys = (df[signal_column] == 1).sum()
+            sells = (df[signal_column] == -1).sum()
+            print(f"{signal_column}: Buy signals: {buys}, Sell signals: {sells}")
 
         df['combined_signal'] = (
                 df['ema_signal'] * self.ema_weight +
                 df['rsi_signal'] * self.rsi_weight +
                 df['macd_signal'] * self.macd_weight +
-                df['atr_signal'] * self.atr_weight +
-                df['bb_signal'] * self.bb_weight
-        )
+                df['bb_signal'] * self.bb_weight +
+                df['atr_signal'] * self.atr_weight)
 
         df['final_signal'] = df['combined_signal'].apply(
             lambda x: 1 if x > self.signal_threshold else (-1 if x < -self.signal_threshold else 0))
+
+        print_signal_counts(df, signal_column='ema_signal')
+        print_signal_counts(df, signal_column='rsi_signal')
+        print_signal_counts(df, signal_column='macd_signal')
+        print_signal_counts(df, signal_column='bb_signal')
+        print_signal_counts(df, signal_column='atr_signal')
+        print_signal_counts(df, signal_column='final_signal')
 
         if historical:
             df.to_csv('../data/backtest_signals.csv')  # Save backtest signals for analysis
