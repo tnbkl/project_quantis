@@ -22,23 +22,23 @@ class TradeManager:
         self.atr_sl_mult = atr_sl_mult
 
     def open_position(self):
-        order = self.client.place_order()
-
-        if order:
-            logging.info(f"Executed {order_type} {side} order for {trade_amount} {self.client.symbol}.")
-        else:
-            logging.error("Trade execution failed.")
-
+        order = self.client.place_order(side = 'buy', type = 'market', amount = 3)
         return order
 
     def create_stop_loss_order(self):
-        pass
+        order = self.client.place_stop_order(side = 'sell', type = 'stop_market', amount = None, price = None,
+                                        close_position = True, stop_price = 2.12, time_in_force = 'GTE_GTC')
+        return order
 
     def create_take_profit_order(self):
-        pass
+        order = self.client.place_stop_order(side = 'sell', type = 'take_profit_market', price = None, amount = None,
+                                        close_position = True, stop_price = 2.135, time_in_force = 'GTE_GTC')
+        return order
 
     def close_position(self):
-        pass
+        order = self.client.place_order(side = 'sell', type = 'market', price = None, amount = None,
+                                        close_position = True)
+        return order
 
 
 
@@ -65,6 +65,7 @@ class TradeManager:
 
 
 '''
+IGNORE BELOW CODE
     def calculate_position_size(self, price):
         """Calculate position size using ATR-based volatility"""
         if self.signal_generator:
