@@ -21,6 +21,24 @@ class TradeManager:
         self.atr_tp_mult = atr_tp_mult
         self.atr_sl_mult = atr_sl_mult
 
+    def open_position(self):
+        order = self.client.place_order()
+
+        if order:
+            logging.info(f"Executed {order_type} {side} order for {trade_amount} {self.client.symbol}.")
+        else:
+            logging.error("Trade execution failed.")
+
+        return order
+
+    def create_stop_loss_order(self):
+        pass
+
+    def create_take_profit_order(self):
+        pass
+
+    def close_position(self):
+        pass
 
 
 
