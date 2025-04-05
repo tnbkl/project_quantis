@@ -29,28 +29,30 @@ def main():
     client = binance_client.BinanceFuturesClient(symbol = SYMBOL, timeframe = TIMEFRAME,
                                                  candlestick_limit = CANDLESTICK_LIMIT)
 
-    # signal_generator = strategy.SignalGenerator(client = client, signal_threshold = SIGNAL_THRESHOLD,
-    #                                             ema_weight=ema, rsi_weight=rsi, macd_weight=macd,
-    #                                            bb_weight=bb, atr_weight=atr)
-    #
-    # backtester = strategy.Backtester(signal_generator = signal_generator, initial_balance = 1000,
-    #                                  take_profit = TAKE_PROFIT, stop_loss = STOP_LOSS,
-    #                                  mode = MODE, dynamic_levels = DYNAMIC_LEVELS,
-    #                                  atr_tp_mult = ATR_TAKE_PROFIT, atr_sl_mult = ATR_STOP_LOSS)
-    #
-    # trader = trade_manager.TradeManager(client = client, signal_generator = signal_generator,
-    #                                      balance_allocation = BALANCE_ALLOCATION,
-    #                                      take_profit = TAKE_PROFIT, stop_loss = STOP_LOSS,
-    #                                      mode = MODE, dynamic_levels = DYNAMIC_LEVELS,
-    #                                      atr_tp_mult = ATR_TAKE_PROFIT, atr_sl_mult = ATR_STOP_LOSS)
+    signal_generator = strategy.SignalGenerator(client = client, signal_threshold = SIGNAL_THRESHOLD,
+                                                 ema_weight=ema, rsi_weight=rsi, macd_weight=macd,
+                                                bb_weight=bb, atr_weight=atr)
 
-    pprint.pprint(client.fetch_open_orders())
+    backtester = strategy.Backtester(signal_generator = signal_generator, initial_balance = 1000,
+                                      take_profit = TAKE_PROFIT, stop_loss = STOP_LOSS,
+                                      mode = MODE, dynamic_levels = DYNAMIC_LEVELS,
+                                      atr_tp_mult = ATR_TAKE_PROFIT, atr_sl_mult = ATR_STOP_LOSS)
+
+    trader = trade_manager.TradeManager(client = client, signal_generator = signal_generator,
+                                          balance_allocation = BALANCE_ALLOCATION,
+                                          take_profit = TAKE_PROFIT, stop_loss = STOP_LOSS,
+                                          mode = MODE, dynamic_levels = DYNAMIC_LEVELS,
+                                          atr_tp_mult = ATR_TAKE_PROFIT, atr_sl_mult = ATR_STOP_LOSS)
+
+    #pprint.pprint(client.fetch_open_orders())
 
     ###pprint.pprint(client.exchange.create_order(symbol=SYMBOL, type='limit', side='buy', amount=5, price=2.15)) # amount in XRP
     ###pprint.pprint(client.exchange.create_order(symbol=SYMBOL,type='take_profit_market',side='sell', amount=None, price=None, params={'closePosition': True, 'stopPrice': 2.18, 'timeInForce': 'GTE_GTC', 'workingType': 'MARK_PRICE'}))
     ###pprint.pprint(client.exchange.create_order(symbol=SYMBOL,type='stop_market',side='sell', amount=None, price=None, params={'closePosition': True, 'stopPrice': 2.12, 'timeInForce': 'GTE_GTC', 'workingType': 'MARK_PRICE'}))
 
-    #client.place_order(order_type='limit',side='buy', amount=10, price=2.1)
+    client.place_order(order_type='limit', side='buy', amount=3, price=1.5)
+
+    #trader.open_position(type='limit', side='buy', amount=3, price=1.5)
 
 if __name__ == "__main__":
     main()

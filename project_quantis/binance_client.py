@@ -82,10 +82,10 @@ class BinanceFuturesClient:
         """Fetch details of a specific order"""
         return self.safe_api_call(self.exchange.fetch_order, order_id, self.symbol)
 
-    def place_order(self, order_type, side, amount, price=None):
+    def place_order(self, order_type, side, amount = None, price = None):
         """Place an order on Binance Futures"""
-        params = {'type': order_type}
-        return self.safe_api_call(self.exchange.create_order, self.symbol, order_type, side, amount, price, params)
+        params={type : order_type}
+        return self.safe_api_call(self.exchange.create_order, self.symbol, side, amount, price, params)
 
     def cancel_order(self, order_id):
         """Cancel an existing order"""
