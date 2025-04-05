@@ -82,10 +82,46 @@ class BinanceFuturesClient:
         """Fetch details of a specific order"""
         return self.safe_api_call(self.exchange.fetch_order, order_id, self.symbol)
 
-    def place_order(self, order_type, side, amount = None, price = None):
-        """Place an order on Binance Futures"""
-        params={type : order_type}
-        return self.safe_api_call(self.exchange.create_order, self.symbol, side, amount, price, params)
+    def place_order(self, side, type, amount = None, price = None, close_position = False):
+        """Place an order for given symbol.
+        :param side: 'buy' or 'sell'
+        :param type: 'limit', 'market'
+        :param price: order price, None for market orders
+        :param amount: Position size in contract quantity
+        """
+        order = self.exchange.create_order(
+            symbol=self.symbol,
+            type = type,
+            side = side,
+            amount = amount,
+            price = price,
+            params = {'closePosition': close_position}
+        )
+        return order
+
+    def place_stop_order(self, side, type, amount = None, price = None,
+                         close_position = True, stop_price = None, time_in_force = 'GTE_GTC', working_type = 'mark_price'):
+        """Place an order for given symbol.
+        :param side: 'buy' or 'sell'
+        :param type: 'stop_market' or 'take_profit_market'
+        :param price: order price, None for market orders
+        :param amount: Position size in contract quantity
+        :param close_position: True for tp/sl
+        :param stop_price: Stop market price
+        :param time_in_force: 'GTE_GTC' for tp/sl
+        """
+        order = self.exchange.create_order(
+            symbol=self.symbol,
+            type = type,
+            side = side,
+            amount = amount,
+            price = price,
+            params = {'closePosition': close_position,
+                      'stopPrice': stop_price,
+                      'timeInForce': time_in_force,
+                      'workingType': working_type}
+        )
+        return order
 
     def cancel_order(self, order_id):
         """Cancel an existing order"""

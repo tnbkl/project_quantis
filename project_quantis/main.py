@@ -46,13 +46,11 @@ def main():
 
     #pprint.pprint(client.fetch_open_orders())
 
+    trader.close_position()
+
     ###pprint.pprint(client.exchange.create_order(symbol=SYMBOL, type='limit', side='buy', amount=5, price=2.15)) # amount in XRP
-    ###pprint.pprint(client.exchange.create_order(symbol=SYMBOL,type='take_profit_market',side='sell', amount=None, price=None, params={'closePosition': True, 'stopPrice': 2.18, 'timeInForce': 'GTE_GTC', 'workingType': 'MARK_PRICE'}))
-    ###pprint.pprint(client.exchange.create_order(symbol=SYMBOL,type='stop_market',side='sell', amount=None, price=None, params={'closePosition': True, 'stopPrice': 2.12, 'timeInForce': 'GTE_GTC', 'workingType': 'MARK_PRICE'}))
-
-    #client.place_order(order_type='limit', side='buy', amount=3, price=1.5)
-
-    #trader.open_position(type='limit', side='buy', amount=3, price=1.5)
+    ###pprint.pprint(client.exchange.create_order(symbol=SYMBOL, type='take_profit_market', side='sell', amount=None, price=None, params={'closePosition': True, 'stopPrice': 2.18, 'timeInForce': 'GTE_GTC', 'workingType': 'MARK_PRICE'}))
+    ###pprint.pprint(client.exchange.create_order(symbol=SYMBOL, type='stop_market', side='sell', amount=None, price=None, params={'closePosition': True, 'stopPrice': 2.12, 'timeInForce': 'GTE_GTC', 'workingType': 'MARK_PRICE'}))
 
 if __name__ == "__main__":
     main()
