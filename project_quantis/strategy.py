@@ -29,7 +29,7 @@ class SignalGenerator:
         df['close'] = df['close'].astype(float)
         return df
 
-    def ema_strategy(self, df, short=7, medium=25, long=99):
+    def ema_strategy(self, df, short=8, medium=21, long=55):
         # Calculate EMAs
         df['ema_short'] = df['close'].ewm(span=short, adjust=False).mean()
         df['ema_medium'] = df['close'].ewm(span=medium, adjust=False).mean()
@@ -40,15 +40,11 @@ class SignalGenerator:
         df['ema_medium_slope'] = df['ema_medium'].diff(1)
 
         # Vectorized conditions
-        prev_buy_cond = (df['ema_short'].shift(1) <= df['ema_medium'].shift(1)) | \
-                        (df['ema_medium'].shift(1) <= df['ema_long'].shift(1))
         curr_buy_cond = (df['ema_short'] > df['ema_medium']) & \
                         (df['ema_medium'] > df['ema_long']) & \
                         (df['ema_short_slope'] > 0) & \
                         (df['close'] > df['ema_short'])
 
-        prev_sell_cond = (df['ema_short'].shift(1) >= df['ema_medium'].shift(1)) | \
-                         (df['ema_medium'].shift(1) >= df['ema_long'].shift(1))
         curr_sell_cond = (df['ema_short'] < df['ema_medium']) & \
                          (df['ema_medium'] < df['ema_long']) & \
                          (df['ema_short_slope'] < 0) & \
@@ -58,8 +54,6 @@ class SignalGenerator:
         df['ema_signal'] = 0
         df.loc[curr_buy_cond, 'ema_signal'] = 1
         df.loc[curr_sell_cond, 'ema_signal'] = -1
-        # df.loc[curr_buy_cond & prev_buy_cond, 'ema_signal'] = 1
-        # df.loc[curr_sell_cond & prev_sell_cond, 'ema_signal'] = -1
 
         return df
 

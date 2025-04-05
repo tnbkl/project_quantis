@@ -4,10 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3dca274a-10e4-457d-bda9-f2cadbbe8216" name="Changes" comment="">
+    <list default="true" id="3dca274a-10e4-457d-bda9-f2cadbbe8216" name="Changes" comment="tunahan">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project_quantis/binance_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/project_quantis/binance_client.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project_quantis/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/project_quantis/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project_quantis/strategy.py" beforeDir="false" afterPath="$PROJECT_DIR$/project_quantis/strategy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project_quantis/trade_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/project_quantis/trade_manager.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,20 +61,20 @@
     <option name="sortByType" value="true" />
     <option name="sortKey" value="BY_TYPE" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Notification.DisplayName-DoNotAsk-CythonWarning&quot;: &quot;Python debugger native extension available&quot;,
-    &quot;Notification.DoNotAsk-CythonWarning&quot;: &quot;true&quot;,
-    &quot;Python.config.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.strategy.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.tools&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Notification.DisplayName-DoNotAsk-CythonWarning": "Python debugger native extension available",
+    "Notification.DoNotAsk-CythonWarning": "true",
+    "Python.config.executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.strategy.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "tunahan",
+    "ignore.virus.scanning.warn.message": "true",
+    "settings.editor.selected.configurable": "configurable.group.tools"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\tbuyu\PycharmProjects\_Project_Quantis\" />
@@ -155,11 +157,49 @@
       <option name="project" value="LOCAL" />
       <updated>1739400617624</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="tunahan">
+      <option name="closed" value="true" />
+      <created>1743839358636</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1743839358636</updated>
+    </task>
+    <task id="LOCAL-00006" summary="tunahan">
+      <option name="closed" value="true" />
+      <created>1743839746636</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1743839746636</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="OPEN_GENERIC_TABS">
+      <map>
+        <entry key="2781bb31-36ec-42de-9bef-825216623756" value="TOOL_WINDOW" />
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="2781bb31-36ec-42de-9bef-825216623756">
+          <value>
+            <State />
+          </value>
+        </entry>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="mac" />
-    <option name="LAST_COMMIT_MESSAGE" value="mac" />
+    <MESSAGE value="tunahan" />
+    <option name="LAST_COMMIT_MESSAGE" value="tunahan" />
   </component>
 </project>
