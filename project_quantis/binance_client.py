@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logging.info("Starting Binance Futures Client...")
 
 class BinanceFuturesClient:
-    def __init__(self, symbol, timeframe='1m', take_profit=0.02, stop_loss=0.01, balance_allocation=0.1, candlestick_limit=500):
+    def __init__(self, symbol, timeframe='1m', candlestick_limit=500):
         self.symbol = symbol
         self.timeframe = timeframe
         self.candlestick_limit = candlestick_limit
