@@ -65,6 +65,7 @@ class TradeManager:
 
 
 '''
+IGNORE BELOW CODE
     def calculate_position_size(self, price):
         """Calculate position size using ATR-based volatility"""
         if self.signal_generator:
