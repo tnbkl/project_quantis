@@ -46,7 +46,6 @@ def main():
 
     pprint.pprint(client.fetch_open_orders())
 
-
     ###pprint.pprint(client.exchange.create_order(symbol=SYMBOL, type='limit', side='buy', amount=5, price=2.15)) # amount in XRP
     ###pprint.pprint(client.exchange.create_order(symbol=SYMBOL,type='take_profit_market',side='sell', amount=None, price=None, params={'closePosition': True, 'stopPrice': 2.18, 'timeInForce': 'GTE_GTC', 'workingType': 'MARK_PRICE'}))
     ###pprint.pprint(client.exchange.create_order(symbol=SYMBOL,type='stop_market',side='sell', amount=None, price=None, params={'closePosition': True, 'stopPrice': 2.12, 'timeInForce': 'GTE_GTC', 'workingType': 'MARK_PRICE'}))
