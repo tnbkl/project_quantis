@@ -21,6 +21,32 @@ class TradeManager:
         self.atr_tp_mult = atr_tp_mult
         self.atr_sl_mult = atr_sl_mult
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
     def calculate_position_size(self, price):
         """Calculate position size using ATR-based volatility"""
         if self.signal_generator:
@@ -75,3 +101,4 @@ class TradeManager:
                                                      side, amount)
         logging.info(f"No open position found for {self.client.symbol}.")
         return None
+'''

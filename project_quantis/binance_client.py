@@ -22,34 +22,6 @@ class BinanceFuturesClient:
             'enableRateLimit': True,
         })
         logging.info("Binance Futures client initialized.")
-        #self.ensure_margin_mode()
-
-    def ensure_margin_mode(self, margin_mode="ISOLATED"):
-        """Ensure margin mode is set to ISOLATED only if it's not already set"""
-        try:
-            balance = self.safe_api_call(self.exchange.fetch_balance)
-            if not balance:
-                logging.error("Failed to fetch account balance.")
-                return
-
-            positions = self.safe_api_call(self.exchange.fetch_positions)
-            if not positions:
-                logging.error("Failed to fetch account positions.")
-                return
-
-            for position in positions:
-                if position['symbol'] == self.symbol.replace("/", "") and position.get(
-                        'marginType') != margin_mode.upper():
-                    params = {"symbol": self.symbol.replace("/", ""), "marginType": margin_mode.upper()}
-                    response = self.safe_api_call(self.exchange.fapiPrivatePostMarginType, params)
-                    if response:
-                        logging.info(f"Margin mode set to {margin_mode.upper()} for {self.symbol}.")
-                    else:
-                        logging.warning(f"Failed to set margin mode for {self.symbol}.")
-                    return
-            logging.info(f"Margin mode for {self.symbol} is already set to {margin_mode.upper()}.")
-        except Exception as e:
-            logging.error(f"Error ensuring margin mode: {e}")
 
     def safe_api_call(self, func, *args, **kwargs):
         """Handles API calls safely with error handling and retries."""
@@ -67,17 +39,21 @@ class BinanceFuturesClient:
                 break
         return None
 
-    def fetch_balance(self):
-        """Fetch account balance on Binance Futures"""
-        return self.safe_api_call(self.exchange.fetch_balance)
-
     def fetch_market_data(self):
         """Fetch latest market ticker data"""
         return self.safe_api_call(self.exchange.fetch_ticker, self.symbol)
 
+    def fetch_balance(self):
+        """Fetch account balance on Binance Futures"""
+        return self.safe_api_call(self.exchange.fetch_balance)
+
     def fetch_open_positions(self):
         """Fetch open positions on Binance Futures"""
         return self.safe_api_call(self.exchange.fetch_positions)
+
+    def fetch_historical_trades(self, limit=100):
+        """Fetch recent trade history"""
+        return self.safe_api_call(self.exchange.fetch_my_trades, self.symbol, limit=limit)
 
     def fetch_latest_candles(self, limit = None):
         """Fetch latest candlestick data for the given symbol"""
@@ -85,12 +61,14 @@ class BinanceFuturesClient:
             limit = self.candlestick_limit
         return self.safe_api_call(self.exchange.fetch_ohlcv, self.symbol, self.timeframe, limit=limit)
 
-    def place_order(self, order_type, side, amount, price=None):
-        """Place an order on Binance Futures"""
-        params = {'type': order_type}
-        if price:
-            params['price'] = price
-        return self.safe_api_call(self.exchange.create_order, self.symbol, order_type, side, amount, price, params)
+    def set_leverage(self, leverage=20):
+        """Set leverage for the given symbol"""
+        params = {'symbol': self.symbol.replace("/", ""), 'leverage': leverage}
+        return self.safe_api_call(self.exchange.fapiPrivatePostLeverage, params)
+
+    def fetch_funding_rate(self):
+        """Fetch the latest funding rate for the given symbol"""
+        return self.safe_api_call(self.exchange.fetch_funding_rate, self.symbol)
 
     def fetch_order_book(self, limit=50):
         """Fetch the order book for the given symbol"""
@@ -104,19 +82,11 @@ class BinanceFuturesClient:
         """Fetch details of a specific order"""
         return self.safe_api_call(self.exchange.fetch_order, order_id, self.symbol)
 
+    def place_order(self, order_type, side, amount, price=None):
+        """Place an order on Binance Futures"""
+        params = {'type': order_type}
+        return self.safe_api_call(self.exchange.create_order, self.symbol, order_type, side, amount, price, params)
+
     def cancel_order(self, order_id):
         """Cancel an existing order"""
         return self.safe_api_call(self.exchange.cancel_order, order_id, self.symbol)
-
-    def set_leverage(self, leverage=20):
-        """Set leverage for the given symbol"""
-        params = {'symbol': self.symbol.replace("/", ""), 'leverage': leverage}
-        return self.safe_api_call(self.exchange.fapiPrivatePostLeverage, params)
-
-    def fetch_funding_rate(self):
-        """Fetch the latest funding rate for the given symbol"""
-        return self.safe_api_call(self.exchange.fetch_funding_rate, self.symbol)
-
-    def fetch_historical_trades(self, limit=50):
-        """Fetch recent trade history"""
-        return self.safe_api_call(self.exchange.fetch_my_trades, self.symbol, limit=limit)

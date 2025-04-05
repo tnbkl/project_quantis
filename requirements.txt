@@ -1,6 +1,6 @@
 ccxt
-pandas
 numpy
+pandas
 matplotlib
 mplfinance
 python-dotenv
