@@ -8,10 +8,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logging.info("Starting Binance Futures Client...")
 
 class BinanceFuturesClient:
-    def __init__(self, symbol, timeframe='1m', candlestick_limit=500):
+    def __init__(self, symbol, timeframe='1m'):
         self.symbol = symbol
         self.timeframe = timeframe
-        self.candlestick_limit = candlestick_limit
 
         self.exchange = ccxt.binance({
             'apiKey': config.BINANCE_API_KEY,
@@ -55,11 +54,9 @@ class BinanceFuturesClient:
         """Fetch recent trade history"""
         return self.safe_api_call(self.exchange.fetch_my_trades, self.symbol, limit=limit)
 
-    def fetch_latest_candles(self, limit = None):
+    def fetch_latest_candles(self, limit = 1000):
         """Fetch latest candlestick data for the given symbol"""
-        if limit is None:
-            limit = self.candlestick_limit
-        return self.safe_api_call(self.exchange.fetch_ohlcv, self.symbol, self.timeframe, limit=limit)
+        return self.safe_api_call(self.exchange.fetch_ohlcv, self.symbol, self.timeframe, limit = limit)
 
     def set_leverage(self, leverage=20):
         """Set leverage for the given symbol"""
@@ -82,46 +79,34 @@ class BinanceFuturesClient:
         """Fetch details of a specific order"""
         return self.safe_api_call(self.exchange.fetch_order, order_id, self.symbol)
 
-    def place_order(self, side, type, amount = None, price = None, close_position = False):
+    def place_order(self, type, side, amount = None, price = None, reduce_only = False):
         """Place an order for given symbol.
-        :param side: 'buy' or 'sell'
         :param type: 'limit', 'market'
-        :param price: order price, None for market orders
-        :param amount: Position size in contract quantity
-        """
-        order = self.exchange.create_order(
-            symbol=self.symbol,
-            type = type,
-            side = side,
-            amount = amount,
-            price = price,
-            params = {'closePosition': close_position}
-        )
-        return order
-
-    def place_stop_order(self, side, type, amount = None, price = None,
-                         close_position = True, stop_price = None, time_in_force = 'GTE_GTC', working_type = 'mark_price'):
-        """Place an order for given symbol.
         :param side: 'buy' or 'sell'
-        :param type: 'stop_market' or 'take_profit_market'
-        :param price: order price, None for market orders
         :param amount: Position size in contract quantity
+        :param price: order price, None for market orders
+        :param reduce_only: True for reducing position size, not exceeds open position level. False by default
+        """
+        return self.safe_api_call(self.exchange.create_order, symbol= self.symbol, type = type, side = side,
+                                  amount = amount, price = price,
+                                  params = {'reduceOnly': reduce_only})
+
+    def place_stop_order(self, type, side, amount = None, price = None, close_position = True, stop_price = None,
+                         time_in_force = 'GTE_GTC', working_type = 'mark_price'):
+        """Place a stop-order for given symbol.
+        :param type: 'stop_market' or 'take_profit_market'
+        :param side: 'buy' or 'sell'
+        :param amount: Position size in contract quantity, None for closing position
+        :param price: order price, None for market orders, None stop-market orders
         :param close_position: True for tp/sl
         :param stop_price: Stop market price
         :param time_in_force: 'GTE_GTC' for tp/sl
+        :param working_type: 'mark_price' for mark price, 'contract_price' for last price
         """
-        order = self.exchange.create_order(
-            symbol=self.symbol,
-            type = type,
-            side = side,
-            amount = amount,
-            price = price,
-            params = {'closePosition': close_position,
-                      'stopPrice': stop_price,
-                      'timeInForce': time_in_force,
-                      'workingType': working_type}
-        )
-        return order
+        return self.safe_api_call(self.exchange.create_order, symbol=self.symbol, type = type, side = side,
+                                  amount = amount, price = price,
+                                  params={'closePosition': close_position, 'stopPrice': stop_price,
+                                          'timeInForce': time_in_force, 'workingType': working_type})
 
     def cancel_order(self, order_id):
         """Cancel an existing order"""
