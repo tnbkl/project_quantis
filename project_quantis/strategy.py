@@ -14,13 +14,8 @@ class SignalGenerator:
         self.bb_weight = bb_weight
         self.signal_threshold = signal_threshold
 
-    def fetch_candles(self, historical=False):
-        if historical:
-            # Fetching larger historical data for backtesting
-            candles = self.client.fetch_latest_candles(limit=1000)
-        else:
-            candles = self.client.fetch_latest_candles()
-
+    def fetch_candles(self):
+        candles = self.client.fetch_latest_candles()
         df = pd.DataFrame(candles, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms') + pd.Timedelta(hours=3)  # Adjusting to GMT+3
         df['open'] = df['open'].astype(float)
@@ -40,24 +35,17 @@ class SignalGenerator:
         df['ema_medium_slope'] = df['ema_medium'].diff(1)
 
         # Vectorized conditions
-        curr_buy_cond = (df['ema_short'] > df['ema_medium']) & \
-                        (df['ema_medium'] > df['ema_long']) & \
-                        (df['ema_short_slope'] > 0) & \
-                        (df['close'] > df['ema_short'])
-
-        curr_sell_cond = (df['ema_short'] < df['ema_medium']) & \
-                         (df['ema_medium'] < df['ema_long']) & \
-                         (df['ema_short_slope'] < 0) & \
-                         (df['close'] < df['ema_short'])
+        buy_cond = (df['close'] > df['ema_short']) & (df['ema_short'] > df['ema_medium']) & (df['ema_medium'] > df['ema_long']) & (df['ema_short_slope'] > 0)
+        sell_cond = (df['close'] < df['ema_short']) & (df['ema_short'] < df['ema_medium']) & (df['ema_medium'] < df['ema_long']) & (df['ema_short_slope'] < 0)
 
         # Generate signals
         df['ema_signal'] = 0
-        df.loc[curr_buy_cond, 'ema_signal'] = 1
-        df.loc[curr_sell_cond, 'ema_signal'] = -1
+        df.loc[buy_cond, 'ema_signal'] = 1
+        df.loc[sell_cond, 'ema_signal'] = -1
 
         return df
 
-    def rsi_strategy(self, df, period=14, divergence_lookback=5):
+    def rsi_strategy(self, df, period=14, divergence_lookback=28):
         # Calculate RSI
         delta = df['close'].diff()
         gain = delta.where(delta > 0, 0)
@@ -91,39 +79,22 @@ class SignalGenerator:
 
         df['divergence'] = detect_divergence(df['close'], df['rsi'], divergence_lookback)
 
-        # Faster trend filter
-        df['trend_ema'] = df['close'].ewm(span=20).mean()
-
-        # Vectorized trend validation
-        df['above_trend'] = df['close'] > df['trend_ema']
-        df['below_trend'] = df['close'] < df['trend_ema']
-        df['valid_trend'] = np.select(
-            [
-                df['above_trend'].rolling(2).apply(lambda x: x.all(), raw=True).fillna(False).astype(bool),
-                df['below_trend'].rolling(2).apply(lambda x: x.all(), raw=True).fillna(False).astype(bool)
-            ],
-            [1, -1],
-            default=0
-        )
-
         # Initialize signal score
         df['rsi_score'] = 0
 
         # Add weights for RSI, Divergence, and Trend
         df['rsi_score'] += np.where(df['rsi'] < df['os_level'], 1, 0)  # RSI oversold adds weight
         df['rsi_score'] += np.where(df['divergence'] == 1, 1, 0)  # Bullish divergence adds weight
-        df['rsi_score'] += np.where(df['valid_trend'] == 1, 1, 0)  # Bullish trend adds weight
 
         df['rsi_score'] -= np.where(df['rsi'] > df['ob_level'], 1, 0)  # RSI overbought subtracts weight
         df['rsi_score'] -= np.where(df['divergence'] == -1, 1, 0)  # Bearish divergence subtracts weight
-        df['rsi_score'] -= np.where(df['valid_trend'] == -1, 1, 0)  # Bearish trend subtracts weight
 
         # Generate final signals based on combined score
-        df['rsi_signal'] = df['rsi_score'].apply(lambda x: 1 if x > 0 else -1 if x < 0 else 0)
+        df['rsi_signal'] = df['rsi_score'].apply(lambda x: 1 if x > 0.5 else -1 if x < -0.5 else 0)
 
         return df
 
-    def macd_strategy(self, df, short_window=12, long_window=26, signal_window=9, cw=0.3, hw=0.7, threshold=0.5):
+    def macd_strategy(self, df, short_window=12, long_window=26, signal_window=9, cw=0.5, hw=0.5, threshold=0.5):
         # Calculate core MACD components
         df['macd_ema_short'] = df['close'].ewm(span=short_window, adjust=False).mean()
         df['macd_ema_long'] = df['close'].ewm(span=long_window, adjust=False).mean()
@@ -162,7 +133,7 @@ class SignalGenerator:
     def bollinger_bands_strategy(self, df, window=20, num_std=2):
         # Calculate Bollinger Bands
         df['middle_band'] = df['close'].rolling(window=window).mean()
-        rolling_std = df['close'].rolling(window=window).std()
+        rolling_std = df['close'].rolling(window=window).std(ddof=0)
         df['upper_band'] = df['middle_band'] + (rolling_std * num_std)
         df['lower_band'] = df['middle_band'] - (rolling_std * num_std)
 
@@ -196,8 +167,8 @@ class SignalGenerator:
 
         return df
 
-    def generate_signal(self, historical=False):
-        df = self.fetch_candles(historical=historical)
+    def generate_signal(self):
+        df = self.fetch_candles()
         df = self.ema_strategy(df)
         df = self.rsi_strategy(df)
         df = self.macd_strategy(df)
@@ -226,10 +197,7 @@ class SignalGenerator:
         print_signal_counts(df, signal_column='atr_signal')
         print_signal_counts(df, signal_column='final_signal')
 
-        if historical:
-            df.to_csv('../data/backtest_signals.csv')  # Save backtest signals for analysis
-        else:
-            df.to_csv('../data/signals.csv')
+        df.to_csv('../data/signals.csv')
 
         return df
 
@@ -316,7 +284,7 @@ class Backtester:
         """
         Run the backtest simulation.
         """
-        df = self.signal_generator.generate_signal(historical=True)
+        df = self.signal_generator.generate_signal()
 
         # Initial balance log
         self.trades.append({
@@ -451,7 +419,7 @@ class Backtester:
         """
         Plot candlestick chart with buy and sell signals.
         """
-        df = self.signal_generator.fetch_candles(historical=True)
+        df = self.signal_generator.fetch_candles()
         trades_df = pd.DataFrame(self.trades)
 
         # Convert timestamps to datetime and align with OHLC data

@@ -21,25 +21,24 @@ class TradeManager:
         self.atr_tp_mult = atr_tp_mult
         self.atr_sl_mult = atr_sl_mult
 
-    def open_position(self):
+    def execute_trade(self):
         order = self.client.place_order(side = 'buy', type = 'market', amount = 3)
+        return order
+
+    def close_position(self):
+        order = self.client.place_order(side = 'sell', type = 'market', price = None, amount = 200,
+                                        reduce_only = True)
         return order
 
     def create_stop_loss_order(self):
         order = self.client.place_stop_order(side = 'sell', type = 'stop_market', amount = None, price = None,
-                                        close_position = True, stop_price = 2.12, time_in_force = 'GTE_GTC')
+                                        close_position = True, stop_price = 2.12, time_in_force = 'GTE_GTC', working_type = 'contract_price')
         return order
 
     def create_take_profit_order(self):
-        order = self.client.place_stop_order(side = 'sell', type = 'take_profit_market', price = None, amount = None,
-                                        close_position = True, stop_price = 2.135, time_in_force = 'GTE_GTC')
+        order = self.client.place_stop_order(side = 'sell', type = 'take_profit_market', amount = None,  price = None,
+                                        close_position = True, stop_price = 2.135, time_in_force = 'GTE_GTC', working_type = 'mark_price')
         return order
-
-    def close_position(self):
-        order = self.client.place_order(side = 'sell', type = 'market', price = None, amount = None,
-                                        close_position = True)
-        return order
-
 
 
 

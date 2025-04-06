@@ -4,10 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3dca274a-10e4-457d-bda9-f2cadbbe8216" name="Changes" comment="mac">
+    <list default="true" id="3dca274a-10e4-457d-bda9-f2cadbbe8216" name="Changes" comment="tnbkl">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project_quantis/binance_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/project_quantis/binance_client.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project_quantis/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/project_quantis/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project_quantis/strategy.py" beforeDir="false" afterPath="$PROJECT_DIR$/project_quantis/strategy.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project_quantis/trade_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/project_quantis/trade_manager.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -18,7 +19,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="tnbkl" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -69,7 +70,7 @@
     &quot;Python.strategy.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;mac&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;tnbkl&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.tools&quot;
   }
@@ -111,7 +112,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-a5bc9544c897-aa17d162503b-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-243.23654.177" />
+        <option value="bundled-python-sdk-4f4e415b4190-aa17d162503b-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-243.26053.29" />
       </set>
     </attachedChunks>
   </component>
@@ -172,31 +173,7 @@
       <option name="project" value="LOCAL" />
       <updated>1743839746636</updated>
     </task>
-    <task id="LOCAL-00007" summary="mac">
-      <option name="closed" value="true" />
-      <created>1743858436097</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1743858436097</updated>
-    </task>
-    <task id="LOCAL-00008" summary="mac">
-      <option name="closed" value="true" />
-      <created>1743861009910</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1743861009911</updated>
-    </task>
-    <task id="LOCAL-00009" summary="mac">
-      <option name="closed" value="true" />
-      <created>1743862154727</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1743862154727</updated>
-    </task>
-    <option name="localTasksCounter" value="10" />
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -221,8 +198,8 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="tunahan" />
     <MESSAGE value="mac" />
-    <option name="LAST_COMMIT_MESSAGE" value="mac" />
+    <MESSAGE value="tunahan" />
+    <option name="LAST_COMMIT_MESSAGE" value="tunahan" />
   </component>
 </project>
